@@ -7,6 +7,7 @@
  * Дата изменения: 10.11.2022
  */
 require_once 'User.php';
+require_once 'UserList.php';
 $link = mysqli_connect('localhost', 'root', 'citroen82', 'tbl', '3308');//подключение к бд
 $tbl_name = 'users';//название таблицы
 $col_name = ['id','name','surname','year','sex', 'city'];//названия столбцов
@@ -28,4 +29,16 @@ if ($link == false) {
     $cheburek = new User($link, $tbl_name, $col_name, 3, 'qwe', 'asdsad', 1999, 1, 'Grodno');
     var_dump($cheburek->formatedObject());
     $cheburek->delete();
+
+    $a = new User($link, $tbl_name, $col_name, 4, 'ert', 'dssvs', 2000, 1, 'Gomel');
+    $b = new User($link, $tbl_name, $col_name, 5, 'dfg', 'mkmno', 1979, 0, 'Brest');
+    $c = new User($link, $tbl_name, $col_name, 6, 'cvb', 'ntrgnm', 1999, 1, 'Smolensk');
+
+    $d = new UserList($link, $tbl_name, $col_name, '> 3');
+    $e = $d->getUserArr();
+    foreach ($e as $value) {
+        print('<br>');
+        var_dump($value->formatedObject());
+    }
+    $d->deleteAll();
 }

@@ -24,9 +24,8 @@ class User {
         $this->conn = $conn;
         $this->tbl_name = $tbl_name;
         $this->column_names = $column_names;
-        $sql = 'SELECT ' . implode(',', $column_names) 
-             . ' FROM' . ' ' . $tbl_name
-             . ' Where id = '.$id;
+        $sql = "SELECT " . implode(',', $column_names) . " FROM {$tbl_name} "
+             . "WHERE {$column_names[0]} = {$id}";
         $result = $conn->query($sql);
         if ($result && $result->num_rows) {
             $res_arr = $result->fetch_row();
@@ -37,7 +36,7 @@ class User {
             $this->sex = $res_arr[4];
             $this->city = $res_arr[5];
         } else {
-            $sql = "INSERT INTO " . $tbl_name . " (" . implode(',', $column_names) . ") "
+            $sql = "INSERT INTO {$tbl_name} (" . implode(',', $column_names) . ") "
                  . "VALUES ($id, '$name', '$surname', $year, $sex, '$city')";
             $this->setId($id);
             $this->setName($name);
