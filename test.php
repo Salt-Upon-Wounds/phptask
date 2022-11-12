@@ -2,13 +2,15 @@
 /**
  * Автор: Котельников Кирилл
  * 
- * Дата реализации:10.11.2022
+ * Дата реализации:10.11.2022 22:00
  * 
- * Дата изменения: 10.11.2022
+ * Дата изменения: 12.11.2022 5:40
+ * 
+ * Утилита для работы с бд
  */
 require_once 'User.php';
 require_once 'UserList.php';
-$link = mysqli_connect('localhost', 'root', 'citroen82', 'tbl', '3308');//подключение к бд
+$link = mysqli_connect('localhost', 'root', 'password', 'table', '3306');//подключение к бд
 $tbl_name = 'users';//название таблицы
 $col_name = ['id','name','surname','year','sex', 'city'];//названия столбцов
 if ($link == false) {
@@ -41,4 +43,5 @@ if ($link == false) {
         var_dump($value->formatedObject());
     }
     $d->deleteAll();
+    $link->close();
 }

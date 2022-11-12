@@ -1,12 +1,24 @@
 <?php
 /**
+ * Автор: Котельников Кирилл
  * 
+ * Дата реализации:10.11.2022 22:00
+ * 
+ * Дата изменения: 12.11.2022 5:40
+ * 
+ * Класс для работы с бд
  */
 
-class User {
+ /**
+  * User
+  * представление человека в таблице с возможностью
+  * изменить, обновить сущность в бд, удалить из бд
+  */
+class User 
+{
     private $conn;
     private $tbl_name;
-    private $column_names;//must be ['id','name','surname','year','sex', 'city']
+    private $column_names;
     private $id;
     private $id_old;//на случай, если пользователь изменит id, храним старый для функций update и delete
     private $name;
@@ -15,11 +27,27 @@ class User {
     private $sex;
     private $city;
 
-    public function __construct($conn, $tbl_name, $column_names, int $id, string $name = null,
-        string $surname = null, int $year = null, $sex = null, string $city = null
+    /**
+     * 
+     * Конструктор находит по айди или создает экземпляр в бд, если не нашел. 
+     * Вслучае ошибки выбрасывает исключение
+     * 
+     * @param mixed $conn подключние к бд
+     * @param mixed $tbl_name название таблицы
+     * @param mixed $column_names название колонок в строгом порядке, например ['id','name','surname','year','sex', 'city']
+     * @param int $id идентификатор
+     * @param string|null $name имя
+     * @param string|null $surname фамилия
+     * @param int|null $year год рождения
+     * @param mixed|null $sex пол
+     * @param string|null $city город рождения
+     */
+    public function __construct($conn, $tbl_name, $column_names, int $id, 
+        string $name = null, string $surname = null, 
+        int $year = null, $sex = null, string $city = null
     ) {
         if ($conn->connect_error) {
-            die("Ошибка: " . $conn->connect_error);
+            die('Error: ' . $conn->connect_error);
         }
         $this->conn = $conn;
         $this->tbl_name = $tbl_name;
@@ -45,7 +73,7 @@ class User {
             $this->setSex($sex);
             $this->setCity($city);
             if (!$conn->query($sql)) {
-                throw new Exception("Error: " . $sql . " " . $conn->error);
+                throw new Exception('Error: ' . $sql . ' ' . $conn->error);
             }
         }
         $this->id_old = $this->id;
@@ -85,7 +113,7 @@ class User {
              . "{$this->column_names[5]} = '{$this->city}'"
              . " WHERE {$this->column_names[0]} = {$this->id_old}";
         if (!$this->conn->query($sql)) {
-            throw new Exception("Error: " . $sql . " " . $this->conn->error);
+            throw new Exception('Error: ' . $sql . ' ' . $this->conn->error);
         } else {
             $this->id_old = $this->id;
         }
@@ -95,7 +123,7 @@ class User {
     public function delete() {
         $sql = "DELETE FROM {$this->tbl_name} WHERE {$this->column_names[0]} = {$this->id_old}";
         if (!$this->conn->query($sql)) {
-            throw new Exception("Error: " . $sql . " " . $this->conn->error);
+            throw new Exception('Error: ' . $sql . ' ' . $this->conn->error);
         } else {
             $this->id_old = $this->id;
         }
@@ -114,7 +142,7 @@ class User {
         if (isset($name)) {
             $name = htmlspecialchars(trim($name));
             if (!preg_match("/^\p{L}+$/", $name)) {
-                throw new Exception("Error: name validation failed");
+                throw new Exception('Error: name validation failed');
             } else {
                 $this->name = $name;
             }
@@ -128,7 +156,7 @@ class User {
         if (isset($surname)) {
             $surname = htmlspecialchars(trim($surname));
             if (!preg_match("/^\p{L}+$/", $surname)) {
-                throw new Exception("Error: surname validation failed");
+                throw new Exception('Error: surname validation failed');
             } else {
                 $this->surname = $surname;
             }
@@ -141,7 +169,7 @@ class User {
     public function setYear(int $year) {
         if (isset($year)) {
             if (date('Y') - $year < 0 && $year < 1900) {
-                throw new Exception("Error: year validation failed");
+                throw new Exception('Error: year validation failed');
             } else {
                 $this->year = $year;
             }
@@ -157,7 +185,7 @@ class User {
             } elseif ($sex == 'жен' || $sex == 0) {
                 $this->sex = 0;
             } else {
-                throw new Exception("Error: sex validation failed");
+                throw new Exception('Error: sex validation failed');
             }
         } else {
             throw new Exception('Error: $sex in setSex is empty');
@@ -169,7 +197,7 @@ class User {
         if (isset($city)) {
             $city = htmlspecialchars(trim($city));
             if (!preg_match("/^(\p{L}+(?:(\. )|-| |'))*\p{L}*$/", $city)) {
-                throw new Exception("Error: city validation failed");
+                throw new Exception('Error: city validation failed');
             } else {
                 $this->city = $city;
             }
