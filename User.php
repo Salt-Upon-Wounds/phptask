@@ -4,11 +4,11 @@
  */
 
 class User {
-    private $db;
+    private $conn;
     private $tbl_name;
     private $column_names;//must be ['id','name','surname','year','sex', 'city']
     private $id;
-    private $id_old;
+    private $id_old;//на случай, если пользователь изменит id, храним старый для функций update и delete
     private $name;
     private $surname;
     private $year;
@@ -21,7 +21,7 @@ class User {
         if ($conn->connect_error) {
             die("Ошибка: " . $conn->connect_error);
         }
-        $this->db = $conn;
+        $this->conn = $conn;
         $this->tbl_name = $tbl_name;
         $this->column_names = $column_names;
         $sql = 'SELECT ' . implode(',', $column_names) 
@@ -36,7 +36,6 @@ class User {
             $this->year = $res_arr[3];
             $this->sex = $res_arr[4];
             $this->city = $res_arr[5];
-            $this->id_old = $this->id;
         } else {
             $sql = "INSERT INTO " . $tbl_name . " (" . implode(',', $column_names) . ") "
                  . "VALUES ($id, '$name', '$surname', $year, $sex, '$city')";
@@ -50,18 +49,42 @@ class User {
                 throw new Exception("Error: " . $sql . " " . $conn->error);
             }
         }
+        $this->id_old = $this->id;
+    }
+
+    public static function yearToAge(int $year) {
+        return date('Y') - $year;
+    }
+
+    public static function SexString($sex) {
+        if ($sex) {
+            return 'муж';
+        } else {
+            return 'жен';
+        }
+    }
+
+    public function formatedObject() {
+        $obj = new stdClass();
+        $obj->id = $this->id;
+        $obj->name = $this->name;
+        $obj->surname = $this->surname;
+        $obj->age = User::yearToAge($this->year);
+        $obj->sex = User::SexString($this->sex);
+        $obj->city = $this->city;
+        return $obj;
     }
 
     //Сохранение полей экземпляра класса в БД
     public function update() {
-        $sql = 'UPDATE ' . $this->tbl_name . ' SET '
-             . $this->column_names[0] . ' = ' . $this->id . ', '
-             . $this->column_names[1] . ' = ' . $this->name . ', '
-             . $this->column_names[2] . ' = ' . $this->surname . ', '
-             . $this->column_names[3] . ' = ' . $this->year . ', '
-             . $this->column_names[4] . ' = ' . $this->sex . ', '
-             . $this->column_names[5] . ' = ' . $this->city 
-             . ' WHERE ' . $this->column_names[0] . ' = ' . $this->id_old;
+        $sql = "UPDATE {$this->tbl_name} SET "
+             . "{$this->column_names[0]} = {$this->id}, "
+             . "{$this->column_names[1]} = '{$this->name}', "
+             . "{$this->column_names[2]} = '{$this->surname}', "
+             . "{$this->column_names[3]} = {$this->year}, "
+             . "{$this->column_names[4]} = {$this->sex}, "
+             . "{$this->column_names[5]} = '{$this->city}'"
+             . " WHERE {$this->column_names[0]} = {$this->id_old}";
         if (!$this->conn->query($sql)) {
             throw new Exception("Error: " . $sql . " " . $this->conn->error);
         } else {
@@ -131,9 +154,9 @@ class User {
     public function setSex($sex) {
         if (isset($sex)) {
             if ($sex == 'муж' || $sex == 1) {
-                $this->$sex = 1;
+                $this->sex = 1;
             } elseif ($sex == 'жен' || $sex == 0) {
-                $this->$sex = 0;
+                $this->sex = 0;
             } else {
                 throw new Exception("Error: sex validation failed");
             }
